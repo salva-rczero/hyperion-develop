@@ -618,6 +618,8 @@ DISABLE_GCC_UNUSED_FUNCTION_WARNING;
  UNDEF_INST( nand_register_long )
  UNDEF_INST( not_xor_register )
  UNDEF_INST( not_xor_register_long )
+ UNDEF_INST( count_leading_zeros );  // provisional EXT_FACILITY_4
+ UNDEF_INST( count_trailing_zeros );  // provisional EXT_FACILITY_4
  UNDEF_INST( nor_register )
  UNDEF_INST( nor_register_long )
  UNDEF_INST( or_register_with_complement )
@@ -4576,8 +4578,8 @@ static INSTR_FUNC gen_opcode_b9xx[256][NUM_INSTR_TAB_PTRS] =
  /*B965*/ GENx___x___x900 ( "OCGRK"     , RRF_a, ASMFMT_RRR      , or_register_long_with_complement                    ),
  /*B966*/ GENx___x___x900 ( "NOGRK"     , RRF_a, ASMFMT_RRR      , nor_register_long                                   ),
  /*B967*/ GENx___x___x900 ( "NXGRK"     , RRF_a, ASMFMT_RRR      , not_xor_register_long                               ),
- /*B968*/ GENx___x___x___ ,
- /*B969*/ GENx___x___x___ ,
+ /*B968*/ GENx___x___x900 ( "CLZG"      , RRE,   ASMFMT_RRE      , count_leading_zeros                                 ),
+ /*B969*/ GENx___x___x900 ( "CTZG"      , RRE,   ASMFMT_RRE      , count_trailing_zeros                                 ),
  /*B96A*/ GENx___x___x___ ,
  /*B96B*/ GENx___x___x___ ,
  /*B96C*/ GENx___x___x___ ,

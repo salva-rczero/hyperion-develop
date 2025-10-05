@@ -4196,6 +4196,33 @@ int     r1, r2, r3;                     /* Values of R fields        */
     regs->GR_G(r1) = ~(regs->GR_G(r2) ^ regs->GR_G(r3));
     regs->psw.cc = regs->GR_G(r1) ? 1 : 0;
 }
+
+/*-------------------------------------------------------------------*/
+/* B968 CLZG  - Count leading Zeros                            [RRE] */
+/*-------------------------------------------------------------------*/
+// provisional EXT_FACILITY_4
+DEF_INST( count_leading_zeros)
+{
+int     r1, r2;                         /* Values of R fields        */
+unsigned long index;
+
+    RRE(inst, regs, r1, r2);
+
+    regs->GR_G(r1) = _BitScanReverse64(&index, regs->GR_G(r2)) ? (63 - index) : 64;
+}
+/*-------------------------------------------------------------------*/
+/* B969 CTZG  - Count trailing Zeros                           [RRE] */
+/*-------------------------------------------------------------------*/
+// provisional EXT_FACILITY_4
+DEF_INST( count_trailing_zeros)
+{
+int     r1, r2;                         /* Values of R fields        */
+unsigned long index;
+
+    RRE(inst, regs, r1, r2);
+    regs->GR_G(r1) = _BitScanReverse64(&index, regs->GR_G(r2)) ? index : 64;
+    
+}
 #endif /* defined( FEATURE_061_MISC_INSTR_EXT_FACILITY_3 ) */
 
 

@@ -3519,8 +3519,6 @@ DEF_INST( nand_register );
 DEF_INST( nand_register_long );
 DEF_INST( not_xor_register );
 DEF_INST( not_xor_register_long );
-DEF_INST( count_leading_zeros );  // provisional EXT_FACILITY_4
-DEF_INST( count_trailing_zeros );  // provisional EXT_FACILITY_4
 DEF_INST( nor_register );
 DEF_INST( nor_register_long );
 DEF_INST( or_register_with_complement );
@@ -3579,6 +3577,13 @@ DEF_INST(convert_packed_to_dfp_ext);
 DEF_INST(convert_packed_to_dfp_long);
 DEF_INST(convert_dfp_ext_to_packed);
 DEF_INST(convert_dfp_long_to_packed);
+#endif
+
+#if defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 )
+DEF_INST( count_leading_zeros );
+DEF_INST( count_trailing_zeros );
+DEF_INST( bit_extract );
+DEF_INST( bit_deposit );
 #endif
 
 #if defined( FEATURE_129_ZVECTOR_FACILITY )

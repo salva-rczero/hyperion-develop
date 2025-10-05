@@ -4196,11 +4196,12 @@ int     r1, r2, r3;                     /* Values of R fields        */
     regs->GR_G(r1) = ~(regs->GR_G(r2) ^ regs->GR_G(r3));
     regs->psw.cc = regs->GR_G(r1) ? 1 : 0;
 }
+#endif /* defined( FEATURE_061_MISC_INSTR_EXT_FACILITY_3 ) */
 
+#if defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 )
 /*-------------------------------------------------------------------*/
 /* B968 CLZG  - Count leading Zeros                            [RRE] */
 /*-------------------------------------------------------------------*/
-// provisional EXT_FACILITY_4
 DEF_INST( count_leading_zeros)
 {
 int     r1, r2;                         /* Values of R fields        */
@@ -4213,7 +4214,6 @@ unsigned long index;
 /*-------------------------------------------------------------------*/
 /* B969 CTZG  - Count trailing Zeros                           [RRE] */
 /*-------------------------------------------------------------------*/
-// provisional EXT_FACILITY_4
 DEF_INST( count_trailing_zeros)
 {
 int     r1, r2;                         /* Values of R fields        */
@@ -4223,8 +4223,67 @@ unsigned long index;
     regs->GR_G(r1) = _BitScanReverse64(&index, regs->GR_G(r2)) ? index : 64;
     
 }
-#endif /* defined( FEATURE_061_MISC_INSTR_EXT_FACILITY_3 ) */
 
+/*-------------------------------------------------------------------*/
+/* B96C BEXTG  - Bit Extract                                 [RRF-a] */
+/*-------------------------------------------------------------------*/
+DEF_INST( bit_extract)
+{
+int     r1, r2, r3;                     /* Values of R fields        */
+unsigned long index;
+U64     result, mask;
+int     shift;
+
+    RRR( inst, regs, r1, r2, r3 );
+
+    result = 0;
+    mask = regs->GR_G(r3);
+    shift = 0;
+
+    while (mask) {
+        _BitScanForward64(&index, mask);       // posición del bit 1 menos significativo
+        if (regs->GR_G(r2) & (1ULL << index))              // si el bit de R2 está activo
+            result |= (1ULL << shift);         // ponerlo en posición shift
+        mask &= ~(1ULL << index);              // borrar ese bit del mask
+        shift++;
+    }
+
+    if (shift > 0)
+        result <<= (64 - shift);               // left-justify
+    
+    regs->GR_G(r1) = result;
+
+}
+
+/*-------------------------------------------------------------------*/
+/* B96D BDEPG  - Bit Deposit                                 [RRF-a] */
+/*-------------------------------------------------------------------*/
+DEF_INST( bit_deposit)
+{
+int     r1, r2, r3;                     /* Values of R fields        */
+unsigned long index;
+U64     result, mask;
+int     bit_pos;
+
+    RRR( inst, regs, r1, r2, r3 );
+
+    mask = regs->GR_G(r3);
+    result = 0;
+    bit_pos = 0; 
+
+    while (mask) {
+        _BitScanReverse64(&index, mask);       // bit más significativo 1
+        if (regs->GR_G(r2) & (1ULL << bit_pos))            // bit correspondiente de R2
+            result |= (1ULL << index);         // colocarlo en la posición del mask
+        mask &= ~(1ULL << index);              // eliminar ese bit del mask
+        bit_pos++;                             
+    }
+
+    regs->GR_G(r1) = result;
+
+}
+
+#endif /* defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 ) */
 
 #if defined( FEATURE_NEW_ZARCH_ONLY_INSTRUCTIONS )
 /*-------------------------------------------------------------------*/

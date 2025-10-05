@@ -618,8 +618,6 @@ DISABLE_GCC_UNUSED_FUNCTION_WARNING;
  UNDEF_INST( nand_register_long )
  UNDEF_INST( not_xor_register )
  UNDEF_INST( not_xor_register_long )
- UNDEF_INST( count_leading_zeros );  // provisional EXT_FACILITY_4
- UNDEF_INST( count_trailing_zeros );  // provisional EXT_FACILITY_4
  UNDEF_INST( nor_register )
  UNDEF_INST( nor_register_long )
  UNDEF_INST( or_register_with_complement )
@@ -678,6 +676,13 @@ DISABLE_GCC_UNUSED_FUNCTION_WARNING;
  UNDEF_INST(convert_packed_to_dfp_ext)
  UNDEF_INST(convert_dfp_long_to_packed)
  UNDEF_INST(convert_dfp_ext_to_packed)
+#endif
+
+#if !defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 )
+ UNDEF_INST( count_leading_zeros );
+ UNDEF_INST( count_trailing_zeros );
+ UNDEF_INST( bit_extract );
+ UNDEF_INST( bit_deposit );
 #endif
 
 #if !defined( FEATURE_129_ZVECTOR_FACILITY )
@@ -4579,11 +4584,11 @@ static INSTR_FUNC gen_opcode_b9xx[256][NUM_INSTR_TAB_PTRS] =
  /*B966*/ GENx___x___x900 ( "NOGRK"     , RRF_a, ASMFMT_RRR      , nor_register_long                                   ),
  /*B967*/ GENx___x___x900 ( "NXGRK"     , RRF_a, ASMFMT_RRR      , not_xor_register_long                               ),
  /*B968*/ GENx___x___x900 ( "CLZG"      , RRE,   ASMFMT_RRE      , count_leading_zeros                                 ),
- /*B969*/ GENx___x___x900 ( "CTZG"      , RRE,   ASMFMT_RRE      , count_trailing_zeros                                 ),
+ /*B969*/ GENx___x___x900 ( "CTZG"      , RRE,   ASMFMT_RRE      , count_trailing_zeros                                ),
  /*B96A*/ GENx___x___x___ ,
  /*B96B*/ GENx___x___x___ ,
- /*B96C*/ GENx___x___x___ ,
- /*B96D*/ GENx___x___x___ ,
+ /*B96C*/ GENx___x___x900 ( "BEXTG"     , RRF_a, ASMFMT_RRR      , bit_extract                                         ),
+ /*B96D*/ GENx___x___x900 ( "BDEPG"     , RRF_a, ASMFMT_RRR      , bit_deposit                                         ),
  /*B96E*/ GENx___x___x___ ,
  /*B96F*/ GENx___x___x___ ,
  /*B970*/ GENx___x___x___ ,

@@ -188,3 +188,9 @@ allTests.*
 3330-shadow_1.cckd64
 3380-shadow_1.cckd64
 3390-shadow_1.cckd64
+print00e.txt
+print00d.txt
+punch00d.txt
+msvc.debug.AMD64.bin/
+msvc.debug.AMD64.map/
+msvc.debug.AMD64.obj/

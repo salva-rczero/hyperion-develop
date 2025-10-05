@@ -108,7 +108,54 @@
 #else
   #error MAX_CPU_ENGS cannot exceed 128
 #endif
+struct IMAPS {
+    U64 imap01[256];
+    U64 imapa4[256];
+    U64 imapa5[16];
+    U64 imapa6[256];
+    U64 imapa7[16];
+    U64 imapb2[256];
+    U64 imapb3[256];
+    U64 imapb9[256];
+    U64 imapc0[16];
+    U64 imapc2[16];
+    U64 imapc4[16];
+    U64 imapc6[16];
+    U64 imapc8[16];
+    U64 imape3[256];
+    U64 imape4[256];
+    U64 imape5[256];
+    U64 imape6[256];
+    U64 imape7[256];
+    U64 imapeb[256];
+    U64 imapec[256];
+    U64 imaped[256];
+    U64 imapxx[256];
 
+    U64 imap01T[256];
+    U64 imapa4T[256];
+    U64 imapa5T[16];
+    U64 imapa6T[256];
+    U64 imapa7T[16];
+    U64 imapb2T[256];
+    U64 imapb3T[256];
+    U64 imapb9T[256];
+    U64 imapc0T[16];
+    U64 imapc2T[16];
+    U64 imapc4T[16];
+    U64 imapc6T[16];
+    U64 imapc8T[16];
+    U64 imape3T[256];
+    U64 imape4T[256];
+    U64 imape5T[256];
+    U64 imape6T[256];
+    U64 imape7T[256];
+    U64 imapebT[256];
+    U64 imapecT[256];
+    U64 imapedT[256];
+    U64 imapxxT[256];
+};
+typedef struct IMAPS IMAPS;
 /*-------------------------------------------------------------------*/
 /*       Structure definition for CPU register context               */
 /*-------------------------------------------------------------------*/
@@ -580,6 +627,13 @@ struct REGS {                           /* Processor registers       */
      /* TLB - Translation lookaside buffer                           */
         unsigned int tlbID;             /* Validation identifier     */
         TLB     tlb;                    /* Translation lookaside buf */
+#if defined( OPTION_INSTR_COUNT_AND_TIME )
+
+        // struct timeval start_time;      /* OPCODE start time         */
+        U64     start_time;             /* OPCODE start time         */
+        IMAPS   imaps;
+
+#endif // defined( OPTION_INSTR_COUNT_AND_TIME )
 
         BLOCK_TRAILER;                  /* Name of block  END        */
 };
@@ -1120,60 +1174,7 @@ atomic_update64( &sysblk.txf_stats[ contran ? 1 : 0 ].txf_ ## ctr, +1 )
         gid_t   rgid, egid, sgid;
 #endif /*!defined(NO_SETUID)*/
 
-#if defined( OPTION_INSTR_COUNT_AND_TIME )
-
         bool    icount;                 /* true = enabled, else not. */
-        struct timeval start_time;      /* OPCODE start time         */
-
-        struct IMAPS {
-            U64 imap01[256];
-            U64 imapa4[256];
-            U64 imapa5[16];
-            U64 imapa6[256];
-            U64 imapa7[16];
-            U64 imapb2[256];
-            U64 imapb3[256];
-            U64 imapb9[256];
-            U64 imapc0[16];
-            U64 imapc2[16];
-            U64 imapc4[16];
-            U64 imapc6[16];
-            U64 imapc8[16];
-            U64 imape3[256];
-            U64 imape4[256];
-            U64 imape5[256];
-            U64 imape6[256];
-            U64 imape7[256];
-            U64 imapeb[256];
-            U64 imapec[256];
-            U64 imaped[256];
-            U64 imapxx[256];
-
-            U64 imap01T[256];
-            U64 imapa4T[256];
-            U64 imapa5T[16];
-            U64 imapa6T[256];
-            U64 imapa7T[16];
-            U64 imapb2T[256];
-            U64 imapb3T[256];
-            U64 imapb9T[256];
-            U64 imapc0T[16];
-            U64 imapc2T[16];
-            U64 imapc4T[16];
-            U64 imapc6T[16];
-            U64 imapc8T[16];
-            U64 imape3T[256];
-            U64 imape4T[256];
-            U64 imape5T[256];
-            U64 imape6T[256];
-            U64 imape7T[256];
-            U64 imapebT[256];
-            U64 imapecT[256];
-            U64 imapedT[256];
-            U64 imapxxT[256];
-        } imaps;
-
-#endif // defined( OPTION_INSTR_COUNT_AND_TIME )
 
         char    *cnslport;              /* console port string       */
         char    *sysgport;              /* SYSG console port string  */

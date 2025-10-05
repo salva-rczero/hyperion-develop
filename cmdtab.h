@@ -1916,6 +1916,8 @@
 
 #define yroffset_cmd_desc       "Set yroffset parameter"
 
+#define counters_desc            "Display current counter" // @salva
+
 #endif // defined( _FW_REF )        /* (pre-table build pass) */
 
 /*-------------------------------------------------------------------*/
@@ -2104,6 +2106,8 @@ COMMAND( "sizeof",                  sizeof_cmd,             SYSCMDNOPERNPROG,   
 
 COMMAND( "locks",                   EXTCMD( locks_cmd ),    SYSPROGDEVEL,       locks_cmd_desc,         locks_cmd_help      )
 COMMAND( "threads",                 EXTCMD( threads_cmd ),  SYSPROGDEVEL,       threads_cmd_desc,       threads_cmd_help    )
+COMMAND( "counters",                counters_cmd,           SYSCMDNOPER,        counters_desc,          NULL                ) // @salva
+
 
 /*-------------------------------------------------------------------*/
 /*             Commands optional by build option                     */

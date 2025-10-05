@@ -2767,7 +2767,7 @@ typedef struct {
     unsigned char opcode1; // Operation code, first byte
     unsigned char opcode2; // Operation code, second byte
     U8 opc2pos;            // Opcode2 position in Instr
-    U64 count;             // Execution count from sysblk.imaps.imap??
+    U64 count;             // Execution count from sum.imap??
     U64 time;              // Execution time
 } ICOUNT_INSTR;
 
@@ -2787,20 +2787,21 @@ static int icount_cmd_sort(const void *x, const void *y)
 /*-------------------------------------------------------------------*/
 int icount_cmd( int argc, char* argv[], char* cmdline )
 {
-    int i, i1, i2;
+    int i, i1, i2, i3;
     REGS *regs;
     BYTE fakeinst[6];
 
 #define  MAX_ICOUNT_INSTR   1000    /* Maximum number of instructions
                                      in architecture instruction set */
     U64  total;
+    LARGE_INTEGER freq;
 
     ICOUNT_INSTR icount[MAX_ICOUNT_INSTR];
 
     char buf[ 192 ];
     char instText[ 7 ];
 
-    regs = sysblk.regs[sysblk.pcpu];
+    IMAPS sum = { 0 };
 
     UNREFERENCED( cmdline );
 
@@ -2820,7 +2821,13 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
             || CMD( argv[1], ZERO,  1 )
         )
         {
-            memset( &sysblk.imaps, 0, sizeof sysblk.imaps );
+            for (i3 = 0; i3 < sysblk.maxcpu; i3++) {
+                regs = sysblk.regs[i3];
+                if (regs != NULL)
+                {
+                    memset(&regs->imaps, 0, sizeof regs->imaps);
+                }
+            }
             // "%-14s set to %s"
             WRMSG( HHC02204, "I", argv[0], "ZERO" );
             return 0;
@@ -2851,6 +2858,22 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
     }
 
     /* (collect...) */
+    U64 *pa = (U64 *)&sum;
+    volatile SYSBLK *keep = &sysblk;
+    printf("%p\n", keep);
+
+    for (i3 = 0; i3 < sysblk.maxcpu; i3++)
+    {
+        regs = sysblk.regs[i3];
+        if (regs != NULL)
+        {
+            U64* pb = (U64*)&regs->imaps;
+            for (i = 0; i < sizeof(struct IMAPS) / sizeof(U64); i++)
+            {
+                pa[i] += pb[i];
+            }
+        }
+    }
 
     i = 0;
     total = 0;
@@ -2865,14 +2888,14 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
             {                                                       \
                 for (i2=0; i2 < _nn; i2++)                          \
                 {                                                   \
-                    if (sysblk.imaps._map[ i2 ])                    \
+                    if (sum._map[ i2 ])                    \
                     {                                               \
                         icount[i].opcode1 = i1;                     \
                         icount[i].opcode2 = i2;                     \
                         icount[i].opc2pos = _pos;                   \
-                        icount[i].time = sysblk.imaps._mapT[ i2 ];  \
-                        icount[i++].count = sysblk.imaps._map[ i2 ];\
-                        total += sysblk.imaps._map[ i2 ];           \
+                        icount[i].time = sum._mapT[ i2 ];  \
+                        icount[i++].count = sum._map[ i2 ];\
+                        total += sum._map[ i2 ];           \
                                                                     \
                         if (i == (MAX_ICOUNT_INSTR - 1))            \
                         {                                           \
@@ -2885,45 +2908,45 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
                 break;                                              \
             }
 
-            ICOUNT_COLLECT_CASE( 0x01, imap01, imap01T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xA4, imapa4, imapa4T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xA5, imapa5, imapa5T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xA6, imapa6, imapa6T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xA7, imapa7, imapa7T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xB2, imapb2, imapb2T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xB3, imapb3, imapb3T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xB9, imapb9, imapb9T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xC0, imapc0, imapc0T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xC2, imapc2, imapc2T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xC4, imapc4, imapc4T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xC6, imapc6, imapc6T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xC8, imapc8, imapc8T,  16, 1 )
-            ICOUNT_COLLECT_CASE( 0xE3, imape3, imape3T, 256, 5 )
-            ICOUNT_COLLECT_CASE( 0xE4, imape4, imape4T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xE5, imape5, imape5T, 256, 1 )
-            ICOUNT_COLLECT_CASE( 0xE6, imape6, imape6T, 256, 5 )
-            ICOUNT_COLLECT_CASE( 0xE7, imape7, imape7T, 256, 5 )
-            ICOUNT_COLLECT_CASE( 0xEB, imapeb, imapebT, 256, 5 )
-            ICOUNT_COLLECT_CASE( 0xEC, imapec, imapecT, 256, 5 )
-            ICOUNT_COLLECT_CASE( 0xED, imaped, imapedT, 256, 5 )
+            ICOUNT_COLLECT_CASE(0x01, imap01, imap01T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xA4, imapa4, imapa4T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xA5, imapa5, imapa5T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xA6, imapa6, imapa6T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xA7, imapa7, imapa7T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xB2, imapb2, imapb2T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xB3, imapb3, imapb3T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xB9, imapb9, imapb9T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xC0, imapc0, imapc0T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xC2, imapc2, imapc2T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xC4, imapc4, imapc4T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xC6, imapc6, imapc6T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xC8, imapc8, imapc8T, 16, 1)
+                ICOUNT_COLLECT_CASE(0xE3, imape3, imape3T, 256, 5)
+                ICOUNT_COLLECT_CASE(0xE4, imape4, imape4T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xE5, imape5, imape5T, 256, 1)
+                ICOUNT_COLLECT_CASE(0xE6, imape6, imape6T, 256, 5)
+                ICOUNT_COLLECT_CASE(0xE7, imape7, imape7T, 256, 5)
+                ICOUNT_COLLECT_CASE(0xEB, imapeb, imapebT, 256, 5)
+                ICOUNT_COLLECT_CASE(0xEC, imapec, imapecT, 256, 5)
+                ICOUNT_COLLECT_CASE(0xED, imaped, imapedT, 256, 5)
 
-            default:
+        default:
             {
 
-                if (sysblk.imaps.imapxx[ i1 ])
+                if (sum.imapxx[i1])
                 {
                     icount[i].opcode1 = i1;
                     icount[i].opcode2 = 0;
                     icount[i].opc2pos = 0;
-                    icount[i].time = sysblk.imaps.imapxxT[ i1 ];
-                    icount[i++].count = sysblk.imaps.imapxx[i1];
+                    icount[i].time = sum.imapxxT[i1];
+                    icount[i++].count = sum.imapxx[i1];
 
-                    total += sysblk.imaps.imapxx[ i1 ];
+                    total += sum.imapxx[i1];
 
                     if (i == (MAX_ICOUNT_INSTR - 1))
                     {
                         // "Too many instructions! (Sorry!)"
-                        WRMSG( HHC02252, "E" );
+                        WRMSG(HHC02252, "E");
                         return -1;
                     }
                 }
@@ -2940,6 +2963,8 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
 #define  ICOUNT_WIDTH  "12"     /* Print field width */
 
     /* (print...) */
+    regs = sysblk.regs[sysblk.pcpu];
+    QueryPerformanceFrequency(&freq);
 
     // "%s"
     WRMSG( HHC02292, "I", "Sorted icount display:" );
@@ -2984,6 +3009,8 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
             }
         }
 
+        double micros = (double)icount[i1].time * 1e6 / (double)freq.QuadPart;
+
         bufl = MSGBUF
         (
             buf,
@@ -2991,8 +3018,8 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
             instText,
             icount[i1].count,
             (int)(icount[i1].count * 100 / total),
-            icount[i1].time,
-            ((float)icount[i1].time / icount[i1].count)
+            (U64)micros,
+            ((float)micros / icount[i1].count)
         );
 
         fakeinst[0] = icount[i1].opcode1;
@@ -3005,6 +3032,14 @@ int icount_cmd( int argc, char* argv[], char* cmdline )
 }
 #endif /* defined( OPTION_INSTR_COUNT_AND_TIME ) */
 
+/*-------------------------------------------------------------------*/
+/* counters - display current counters                               */
+/*-------------------------------------------------------------------*/
+int counters_cmd(int argc, char* argv[], char* cmdline)
+{
+    WRMSG( HHC02235, "I", sysblk.instcount);
+    return 0;
+}
 
 /*-------------------------------------------------------------------*/
 /* createCpuId  -  Create the requested CPU ID                       */

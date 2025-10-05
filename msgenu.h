@@ -1425,7 +1425,7 @@ LOGM_DLL_IMPORT int  panel_command_capture( char* cmd, char** resp, bool quiet )
 #define HHC02232 "%1d:%04X attention request rejected"
 #define HHC02233 "%1d:%04X subchannel not enabled"
 #define HHC02234 "Are you sure you didn't mean 'ipl %04X'"
-//efine HHC02235 (available)
+#define HHC02235 "Instcount:  %"PRIu64" " // @salva
 //efine HHC02236 (available)
 #define HHC02237 "Not all devices shown (max %d)"
 #define HHC02238 "Device numbers can only be redefined within the same Logical Channel SubSystem"

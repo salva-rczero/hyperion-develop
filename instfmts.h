@@ -926,6 +926,30 @@
 }
 #endif /* defined( OPTION_OPTINST ) */
 
+#define RXY_C( _inst, _regs, _r1, _x2, _b2, _disp2 )  RXY_DECODER_C( _inst, _regs, _r1, _x2, _b2, _disp2, 6, 6 )
+
+//  0           1           2           3           4           5           6
+//  +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+//  |     OP    | r1  | x2  | b2  |      dxl2       |   dxh2    |    XOP    |    RXY-ca
+//  +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+//  0     4     8     12    16    20    24    28    32    36    40    44   47
+
+#define RXY_DECODER_C( _inst, _regs, _r1, _x2, _b2, _disp2, _len, _ilc ) \
+{                                                                   \
+    U32 temp = fetch_fw( _inst );                                   \
+                                                                    \
+    (_disp2) = (temp >>  0) & 0xfff;                                \
+    (_r1) = (temp >> 20) & 0xf;                                     \
+    (_x2) = (temp >> 16) & 0xf;                                     \
+    (_b2) = (temp >> 12) & 0xf;                                     \
+                                                                    \
+    disp2 |= (_inst[4] << 12);                                      \
+    if (disp2 & 0x80000)        /* high order bit on?  */           \
+        disp2 |= 0xfff00000;  /* make disp2 negative */  \
+                                                                    \
+    INST_UPDATE_PSW( (_regs), (_len), (_ilc) );                     \
+}
+
 /*-------------------------------------------------------------------*/
 /*    RS - register and storage with additional R3 or M3 field       */
 /*-------------------------------------------------------------------*/

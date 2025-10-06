@@ -683,6 +683,16 @@ DISABLE_GCC_UNUSED_FUNCTION_WARNING;
  UNDEF_INST( count_trailing_zeros );
  UNDEF_INST( bit_extract );
  UNDEF_INST( bit_deposit );
+ UNDEF_INST( load_indexed_address_shift_left_0 );
+ UNDEF_INST( load_logical_indexed_address_shift_left_0 );
+ UNDEF_INST( load_indexed_address_shift_left_1 );
+ UNDEF_INST( load_logical_indexed_address_shift_left_1 );
+ UNDEF_INST( load_indexed_address_shift_left_2 );
+ UNDEF_INST( load_logical_indexed_address_shift_left_2 );
+ UNDEF_INST( load_indexed_address_shift_left_3 );
+ UNDEF_INST( load_logical_indexed_address_shift_left_3 );
+ UNDEF_INST( load_indexed_address_shift_left_4 );
+ UNDEF_INST( load_logical_indexed_address_shift_left_4 );
 #endif
 
 #if !defined( FEATURE_129_ZVECTOR_FACILITY )
@@ -4955,16 +4965,16 @@ static INSTR_FUNC gen_opcode_e3xx[256][NUM_INSTR_TAB_PTRS] =
  /*E35D*/ GENx___x___x___ ,
  /*E35E*/ GENx37Xx___x900 ( "ALY"       , RXY_a, ASMFMT_RXY      , add_logical_y                                       ),
  /*E35F*/ GENx37Xx___x900 ( "SLY"       , RXY_a, ASMFMT_RXY      , subtract_logical_y                                  ),
- /*E360*/ GENx___x___x___ ,
- /*E361*/ GENx___x___x___ ,
- /*E362*/ GENx___x___x___ ,
- /*E363*/ GENx___x___x___ ,
- /*E364*/ GENx___x___x___ ,
- /*E365*/ GENx___x___x___ ,
- /*E366*/ GENx___x___x___ ,
- /*E367*/ GENx___x___x___ ,
- /*E368*/ GENx___x___x___ ,
- /*E369*/ GENx___x___x___ ,
+ /*E360*/ GENx___x___x900 ( "LXAB"      , RXY_c, ASMFMT_RXY      , load_indexed_address_shift_left_0                   ),
+ /*E361*/ GENx___x___x900 ( "LLXAB"     , RXY_c, ASMFMT_RXY      , load_logical_indexed_address_shift_left_0           ),
+ /*E362*/ GENx___x___x900 ( "LXAH"      , RXY_c, ASMFMT_RXY      , load_indexed_address_shift_left_1                   ),
+ /*E363*/ GENx___x___x900 ( "LLXAH"     , RXY_c, ASMFMT_RXY      , load_logical_indexed_address_shift_left_1           ),
+ /*E364*/ GENx___x___x900 ( "LXAF"      , RXY_c, ASMFMT_RXY      , load_indexed_address_shift_left_2                   ),
+ /*E365*/ GENx___x___x900 ( "LLXAF"     , RXY_c, ASMFMT_RXY      , load_logical_indexed_address_shift_left_2           ),
+ /*E366*/ GENx___x___x900 ( "LXAG"      , RXY_c, ASMFMT_RXY      , load_indexed_address_shift_left_3                   ),
+ /*E367*/ GENx___x___x900 ( "LLXAG"     , RXY_c, ASMFMT_RXY      , load_logical_indexed_address_shift_left_3           ),
+ /*E368*/ GENx___x___x900 ( "LXAQ"      , RXY_c, ASMFMT_RXY      , load_indexed_address_shift_left_4                   ),
+ /*E369*/ GENx___x___x900 ( "LLXAQ"     , RXY_c, ASMFMT_RXY      , load_logical_indexed_address_shift_left_4           ),
  /*E36A*/ GENx___x___x___ ,
  /*E36B*/ GENx___x___x___ ,
  /*E36C*/ GENx___x___x___ ,

@@ -4205,11 +4205,10 @@ int     r1, r2, r3;                     /* Values of R fields        */
 DEF_INST( count_leading_zeros)
 {
 int     r1, r2;                         /* Values of R fields        */
-unsigned long index;
 
     RRE(inst, regs, r1, r2);
 
-    regs->GR_G(r1) = _BitScanReverse64(&index, regs->GR_G(r2)) ? (63 - index) : 64;
+    regs->GR_G(r1) = _lzcnt_u64(regs->GR_G(r2));
 }
 /*-------------------------------------------------------------------*/
 /* B969 CTZG  - Count trailing Zeros                           [RRE] */
@@ -4217,41 +4216,24 @@ unsigned long index;
 DEF_INST( count_trailing_zeros)
 {
 int     r1, r2;                         /* Values of R fields        */
-unsigned long index;
 
     RRE(inst, regs, r1, r2);
-    regs->GR_G(r1) = _BitScanReverse64(&index, regs->GR_G(r2)) ? index : 64;
+    regs->GR_G(r1) = _tzcnt_u64(regs->GR_G(r2));
     
 }
 
 /*-------------------------------------------------------------------*/
 /* B96C BEXTG  - Bit Extract                                 [RRF-a] */
 /*-------------------------------------------------------------------*/
-DEF_INST( bit_extract)
+DEF_INST(bit_extract)
 {
 int     r1, r2, r3;                     /* Values of R fields        */
-unsigned long index;
-U64     result, mask;
-int     shift;
+U64     mask;
 
-    RRR( inst, regs, r1, r2, r3 );
+    RRR(inst, regs, r1, r2, r3);
 
-    result = 0;
     mask = regs->GR_G(r3);
-    shift = 0;
-
-    while (mask) {
-        _BitScanForward64(&index, mask);       // posición del bit 1 menos significativo
-        if (regs->GR_G(r2) & (1ULL << index))              // si el bit de R2 está activo
-            result |= (1ULL << shift);         // ponerlo en posición shift
-        mask &= ~(1ULL << index);              // borrar ese bit del mask
-        shift++;
-    }
-
-    if (shift > 0)
-        result <<= (64 - shift);               // left-justify
-    
-    regs->GR_G(r1) = result;
+    regs->GR_G(r1) = mask ? _pext_u64(regs->GR_G(r2), mask) << (64 - __popcnt64(mask)) : 0;
 
 }
 
@@ -4261,25 +4243,10 @@ int     shift;
 DEF_INST( bit_deposit)
 {
 int     r1, r2, r3;                     /* Values of R fields        */
-unsigned long index;
-U64     result, mask;
-int     bit_pos;
 
     RRR( inst, regs, r1, r2, r3 );
 
-    mask = regs->GR_G(r3);
-    result = 0;
-    bit_pos = 0; 
-
-    while (mask) {
-        _BitScanReverse64(&index, mask);       // bit más significativo 1
-        if (regs->GR_G(r2) & (1ULL << bit_pos))            // bit correspondiente de R2
-            result |= (1ULL << index);         // colocarlo en la posición del mask
-        mask &= ~(1ULL << index);              // eliminar ese bit del mask
-        bit_pos++;                             
-    }
-
-    regs->GR_G(r1) = result;
+    regs->GR_G(r1) = (regs->GR_G(r3) == 0) ? 0 : _pdep_u64(regs->GR_G(r2), regs->GR_G(r3));
 
 }
 
@@ -7487,6 +7454,287 @@ U32     n;                              /* 32-bit operand values     */
 } /* end DEF_INST(compare_y) */
 #endif /* defined( FEATURE_018_LONG_DISPL_INST_FACILITY ) */
 
+#if defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 )
+/*-------------------------------------------------------------------*/
+/* E360  LXAB   - Load indexed address (shift left 0)        [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_indexed_address_shift_left_0)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((S64)disp2) << 0;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E361  LLXAB - Load logical indexed address (shift left 0) [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_logical_indexed_address_shift_left_0)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((U32)disp2) << 0;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E362  LXAH   - Load indexed address (shift left 1)        [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_indexed_address_shift_left_1)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((S64)disp2) << 1;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E363  LLXAH - Load logical indexed address (shift left 1) [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_logical_indexed_address_shift_left_1)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((U32)disp2) << 1;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E364  LXAF   - Load indexed address (shift left 2)        [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_indexed_address_shift_left_2)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((S64)disp2) << 2;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E365  LLXAF - Load logical indexed address (shift left 2) [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_logical_indexed_address_shift_left_2)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((U32)disp2) << 2;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E366  LXAG   - Load indexed address (shift left 3)        [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_indexed_address_shift_left_3)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((S64)disp2) << 3;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E367  LLXAG - Load logical indexed address (shift left 3) [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_logical_indexed_address_shift_left_3)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((U32)disp2) << 3;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E368  LXAQ   - Load indexed address (shift left 4)        [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_indexed_address_shift_left_4)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((S64)disp2) << 4;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+
+/*-------------------------------------------------------------------*/
+/* E369  LLXAQ - Load logical indexed address (shift left 4) [RXY-c] */
+/*-------------------------------------------------------------------*/
+DEF_INST(load_logical_indexed_address_shift_left_4)
+{
+int     r1;                             /* Value of R field          */
+int     x2;                             /* Index register            */
+int     b2;                             /* Base of effective addr    */
+S32     disp2;                          /* Displacement              */
+VADR    effective_addr2;                /* Effective address         */
+
+
+    RXY_C( inst, regs, r1, x2, b2, disp2)
+
+    if (x2)
+        disp2 += regs->GR_L(x2);
+    
+    effective_addr2 = ((U32)disp2) << 4;
+
+    if (b2)
+        effective_addr2 += regs->GR_G(b2);
+    
+    effective_addr2 &= ADDRESS_MAXWRAP(regs);
+
+    SET_GR_A(r1, regs, effective_addr2);
+
+}
+#endif /* defined( FEATURE_084_MISC_INSTR_EXT_FACILITY_4 ) */
 
 #if defined( FEATURE_018_LONG_DISPL_INST_FACILITY )
 /*-------------------------------------------------------------------*/

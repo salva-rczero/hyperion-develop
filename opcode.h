@@ -3584,6 +3584,16 @@ DEF_INST( count_leading_zeros );
 DEF_INST( count_trailing_zeros );
 DEF_INST( bit_extract );
 DEF_INST( bit_deposit );
+DEF_INST( load_indexed_address_shift_left_0 );
+DEF_INST( load_logical_indexed_address_shift_left_0 );
+DEF_INST( load_indexed_address_shift_left_1 );
+DEF_INST( load_logical_indexed_address_shift_left_1 );
+DEF_INST( load_indexed_address_shift_left_2 );
+DEF_INST( load_logical_indexed_address_shift_left_2 );
+DEF_INST( load_indexed_address_shift_left_3 );
+DEF_INST( load_logical_indexed_address_shift_left_3 );
+DEF_INST( load_indexed_address_shift_left_4 );
+DEF_INST( load_logical_indexed_address_shift_left_4 );
 #endif
 
 #if defined( FEATURE_129_ZVECTOR_FACILITY )
